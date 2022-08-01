@@ -101,7 +101,7 @@ cond2 = Biden_reviews['Sentiment_Polarity'].isin(reviews1['Sentiment_Polarity'])
 Biden_reviews.drop(Biden_reviews[cond2].index, inplace = True)
 Biden_reviews.shape
 
-### Balancing both datasets by limiting to 1000 samples each
+### Balancing both datasets
 
 # Donald Trump      
 np.random.seed(10)
