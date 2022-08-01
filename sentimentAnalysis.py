@@ -1,34 +1,17 @@
-# Install Libraries
-pip install -U textblob
-pip install pandas
-pip install numpy
-pip install plotly
-pip install seaborn
-pip install matplotlib
-pip install wordcloud
-
 # Import Libraries
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-%matplotlib inline
 from textblob import TextBlob
 from wordcloud import WordCloud
 import plotly.graph_objects as go
 import plotly.express as px
 
-#Reading both the csv Files
-Trump_reviews = pd.read_csv('/content/Trumpall2.csv', encoding = 'utf-8')
-Biden_reviews = pd.read_csv('/content/Bidenall2.csv', encoding = 'utf-8')
+# Reading both the csv Files
+Trump_reviews = pd.read_csv('/data/trump_data.csv', encoding = 'utf-8')
+Biden_reviews = pd.read_csv('/data/biden_data.csv', encoding = 'utf-8')
 
-#Visualizing Dataframes
-Trump_reviews.head()
-Biden_reviews.head()
-
-#Visualizing text
-Trump_reviews['text'][10]
-Biden_reviews['text'][500]
 
 # Finding sentiments using TextBlob
 text_blob_object1 = TextBlob(Trump_reviews['text'][10])
@@ -38,9 +21,9 @@ print(text_blob_object2.sentiment)
 
 # Sentence  with zero polarity and subjectivity
 text_blob_object2 = TextBlob(Biden_reviews['text'][100])
-print(text_blob_object2.sentiment
+print(text_blob_object2.sentiment)
       
-# Finding Sentiment Polarity for each datasets
+### Finding Sentiment Polarity for each datasets
 
 # Donald Trump
 def find_pol(review):
@@ -56,7 +39,7 @@ def find_pol(review):
 Biden_reviews['Sentiment_Polarity'] = Biden_reviews['text'].apply(find_pol)
 Biden_reviews.tail()
       
-# Adding one more attribute for Expression Label
+### Adding one more attribute for Expression Label
 
 # Donald Trump
 Trump_reviews['Expression Label'] = np.where(Trump_reviews['Sentiment_Polarity']>0,'positive', 'negative')
@@ -68,7 +51,9 @@ Biden_reviews['Expression Label'] = np.where(Biden_reviews['Sentiment_Polarity']
 Biden_reviews['Expression Label'][Biden_reviews.Sentiment_Polarity ==0] = "Neutral"
 Biden_reviews.tail()
 
-# Analyzing Positive, Negative and Neutral replies on Trump's tweets.     
+### Analyzing Positive, Negative and Neutral replies
+
+# Trump's tweets     
 new1 = Trump_reviews.groupby('Expression Label').count()
 x = list(new1['Sentiment_Polarity'])
 y = list(new1.index)
@@ -84,7 +69,7 @@ fig = go.Figure(go.Bar(x=df['x'],
 fig.update_layout(title_text='Trump\'s Reviews Analysis' )
 fig.show()
       
-# Analyzing Positive, Negative and Neutral replies on Biden's tweets
+# Biden's tweets
 new2 = Biden_reviews.groupby('Expression Label').count()
 x = list(new2['Sentiment_Polarity'])
 y = list(new2.index)
@@ -100,7 +85,7 @@ fig = go.Figure(go.Bar(x=df['x'],
 fig.update_layout(title_text='Biden\'s Reviews Analysis' )
 fig.show()
       
-# Dropping all the statements having zero polarity
+### Dropping all the statements having zero polarity
 
 # Donald Trump      
 reviews1 = Trump_reviews[Trump_reviews['Sentiment_Polarity'] == 0.0000]
@@ -116,7 +101,7 @@ cond2 = Biden_reviews['Sentiment_Polarity'].isin(reviews1['Sentiment_Polarity'])
 Biden_reviews.drop(Biden_reviews[cond2].index, inplace = True)
 Biden_reviews.shape
 
-# Let's make both the datasets balanced now. So we will just take 1000 rows from both datasets and drop rest of them.
+### Balancing both datasets by limiting to 1000 samples each
 
 # Donald Trump      
 np.random.seed(10)
@@ -132,7 +117,7 @@ drop_indices = np.random.choice(Biden_reviews.index, remove_n, replace=False)
 df_subset_biden = Biden_reviews.drop(drop_indices)
 df_subset_biden.shape
  
-# Data Visualiization
+### Data Visualiization
 
 # Donald Trump      
 sns.distplot(df_subset_trump['Sentiment_Polarity'])
@@ -144,20 +129,22 @@ sns.distplot(df_subset_biden['Sentiment_Polarity'])
 sns.boxplot([df_subset_biden.Sentiment_Polarity])
 plt.show()
       
-# Percentage count for Donald Trump
+### Percentage count
+
+# Donald Trump
 count_1 = df_subset_trump.groupby('Expression Label').count()
 print(count_1)
 negative_per1 = (count_1['Sentiment_Polarity'][0]/1000)*100
 positive_per1 = (count_1['Sentiment_Polarity'][1]/1000)*100
 
-# Percentage count for Joe Biden      
+# Joe Biden      
 count_2 = df_subset_biden.groupby('Expression Label').count()
 print(count_2)
 negative_per2 = (count_2['Sentiment_Polarity'][0]/1000)*100
 positive_per2 = (count_2['Sentiment_Polarity'][1]/1000)*100
 
       
-# Analysis of Positive and Negative comments on both the handle
+### Analysis of Positive and Negative comments on both the handle
 
 Politicians = ['Donald Trump', 'Joe Biden']
 lis_pos = [positive_per1, positive_per2]
@@ -167,13 +154,14 @@ fig = go.Figure(data=[
     go.Bar(name='Positive', x=Politicians, y=lis_pos),
     go.Bar(name='Negative', x=Politicians, y=lis_neg)
 ])
+
 # Change the bar mode
 fig.update_layout(barmode='group')
 fig.show()
       
-# Most Positive and Most Negative comments on both the Twitter handles
+### Most Positive and Most Negative comments on both the Twitter handles
 
-# Donald Trump
+## Donald Trump
 # Most positive replies      
 most_positive1 = df_subset_trump[df_subset_trump.Sentiment_Polarity == 1].text.head()
 pos_txt1 = list(most_positive1)
@@ -187,7 +175,6 @@ fig = go.Figure(data=[go.Table(columnorder = [1,2],
                cells=dict(values=[pos_pol1, pos_txt1],
                                fill_color='lavender',
                                align='left'))])
- 
 fig.show()
 
 # Most Negative Replies      
@@ -203,10 +190,9 @@ fig = go.Figure(data=[go.Table(columnorder = [1,2],
                 cells=dict(values=[neg_pol1, neg_txt1],
                            fill_color='lavender',
                            align='left'))])
-
 fig.show()
 
-# Joe Biden
+## Joe Biden
 # Most Positive replies      
 most_positive2 = df_subset_biden[df_subset_biden.Sentiment_Polarity == 1].text.tail()
 pos_txt2 = list(most_positive2)
@@ -220,7 +206,6 @@ fig = go.Figure(data=[go.Table(columnorder = [1,2],
                 cells=dict(values=[pos_pol2, pos_txt2],
                            fill_color='lavender',
                            align='left'))])
-
 fig.show()
 
 # Most negative replies
@@ -236,32 +221,9 @@ fig = go.Figure(data=[go.Table(columnorder = [1,2],
                 cells=dict(values=[neg_pol2, neg_txt2],
                            fill_color='lavender',
                            align='left'))])
-
 fig.show()
 
-# WordCloud for Donald Trump      
-# Start with one review:
-text = str(df_subset_biden.text)
-# Create and generate a word cloud image:
-wordcloud = WordCloud(max_font_size=100, max_words=500, scale=10, relative_scaling=.6, background_color="black", colormap = "rainbow").generate(text)
-# Display the generated image:
-plt.figure(figsize=(15,10))
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis("off")
-plt.show()
-
-# WordCloud for Joe Biden      
-# Start with one review:
-text = str(Biden_reviews.text)
-# Create and generate a word cloud image:
-wordcloud = WordCloud(max_font_size=100, max_words=500,scale=10,relative_scaling=.6,background_color="black", colormap = "rainbow").generate(text)
-# Display the generated image:
-plt.figure(figsize=(15,10))
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis("off")
-plt.show()
-
-# Comparison between negative comments on both      
+# Comparison between negative comments
 labels =  ['Negative_Trump', 'Negative_Biden'] 
 sizes = lis_neg
 explode = (0.1, 0.1)
@@ -270,7 +232,7 @@ ax1.pie(sizes, explode=explode, labels = labels, autopct = '%1.1f%%', shadow = T
 ax1.set_title('Negative tweets on both the handles')
 plt.show()
 
-# Comparison between Positive comments on both      
+# Comparison between Positive comments
 labels =  ['Positive_Trump', 'Positive_Biden'] 
 sizes = lis_pos
 explode = (0.1, 0.1)
